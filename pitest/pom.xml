@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>pitest-parent</artifactId>
 		<groupId>org.pitest</groupId>
-		<version>0.33-SNAPSHOT</version>
+		<version>0.33-MIR</version>
 	</parent>
 	<artifactId>pitest</artifactId>
 	<packaging>jar</packaging>
@@ -194,7 +194,7 @@
 			               <dependencyDefinition>
 			                   show allResults
 			                   check absenceOfPackageCycles > 1 in org.pitest.*
-			               </dependencyDefinition>
+			               </dependencyDefinition>	
 			            </configuration>
 					</execution>
 				</executions>
@@ -213,12 +213,12 @@
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm</artifactId>
-			<version>5.0_BETA</version>
+			<version>4.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-commons</artifactId>
-			<version>5.0_BETA</version>
+			<version>4.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
@@ -235,13 +235,13 @@
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-util</artifactId>
-			<version>5.0_BETA</version>
+			<version>4.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-analysis</artifactId>
-			<version>5.0_BETA</version>
+			<version>4.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

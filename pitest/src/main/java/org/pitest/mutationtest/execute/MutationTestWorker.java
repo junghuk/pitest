@@ -43,6 +43,8 @@ import org.pitest.testapi.TestUnit;
 import org.pitest.util.IsolationUtils;
 import org.pitest.util.Log;
 
+import org.pitest.testapi.Description;
+
 public class MutationTestWorker {
 
   private static final Logger                               LOG = Log
@@ -176,7 +178,8 @@ public class MutationTestWorker {
       staticConfig.addTestListener(listener);
 
       final Pitest pit = new Pitest(staticConfig);
-      pit.run(c, createEarlyExitTestGroup(tests));
+      //pit.run(c, createEarlyExitTestGroup(tests));
+      pit.run(c, tests);
 
       return createStatusTestPair(listener);
     } catch (final Exception ex) {
@@ -188,9 +191,19 @@ public class MutationTestWorker {
   private MutationStatusTestPair createStatusTestPair(
       final CheckTestHasFailedResultListener listener) {
     if (listener.lastFailingTest().hasSome()) {
-      return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
+      /*return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
           listener.status(), listener.lastFailingTest().value()
-              .getQualifiedName());
+              .getQualifiedName());*/
+      List<Description> descriptions = listener.lastFailingTest().value();
+      StringBuilder buf = new StringBuilder();
+      for (Description d : descriptions) {
+        buf.append(d.getQualifiedName());
+        buf.append(",");
+      }
+      String killingTests = buf.substring(0, buf.length()-1);
+
+      return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
+        listener.status(), killingTests);
     } else {
       return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
           listener.status());

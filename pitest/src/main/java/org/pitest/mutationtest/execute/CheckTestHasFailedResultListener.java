@@ -20,9 +20,16 @@ import org.pitest.testapi.Description;
 import org.pitest.testapi.TestListener;
 import org.pitest.testapi.TestResult;
 
+import java.util.ArrayList;
+
+import java.util.logging.Logger;
+import org.pitest.util.Log;
+
 public class CheckTestHasFailedResultListener implements TestListener {
 
-  private Option<Description> lastFailingTest = Option.none();
+  private static final Logger LOG = Log.getLogger();
+
+  private Option< ArrayList<Description> > lastFailingTest = Option.none();
   private int                 testsRun        = 0;
 
   public void onTestError(final TestResult tr) {
@@ -30,7 +37,10 @@ public class CheckTestHasFailedResultListener implements TestListener {
   }
 
   private void recordFailingTest(final TestResult tr) {
-    this.lastFailingTest = Option.some(tr.getDescription());
+    if (!this.lastFailingTest.hasSome()) {
+      this.lastFailingTest = Option.some(new ArrayList<Description>());
+    }
+    this.lastFailingTest.value().add(tr.getDescription());;
   }
 
   public void onTestFailure(final TestResult tr) {
@@ -58,7 +68,7 @@ public class CheckTestHasFailedResultListener implements TestListener {
     }
   }
 
-  public Option<Description> lastFailingTest() {
+  public Option< ArrayList<Description> > lastFailingTest() {
     return this.lastFailingTest;
   }
 
