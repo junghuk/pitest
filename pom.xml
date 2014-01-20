@@ -48,7 +48,7 @@
         <module>pitest-ant</module>
         <module>pitest-command-line</module>    
         <module>pitest-html-report</module> 
-	<module>pitest-maven-verification</module>
+	    <module>pitest-maven-verification</module>
         <module>pitest-groovy-verification</module>
     </modules>
 
