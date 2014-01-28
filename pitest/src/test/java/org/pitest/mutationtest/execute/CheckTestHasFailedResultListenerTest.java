@@ -58,8 +58,17 @@ public class CheckTestHasFailedResultListenerTest {
   @Test
   public void shouldRecordDescriptionOfLastFailingTest() {
     this.testee.onTestFailure(new TestResult(this.description, null));
-    //assertEquals(Option.some(this.description), this.testee.lastFailingTest());
     java.util.ArrayList<Description> descriptions = new java.util.ArrayList<Description>();
+    descriptions.add(this.description);
+    assertEquals(Option.some(descriptions), this.testee.lastFailingTest());
+  }
+
+  @Test
+  public void shouldRecordMultipleDescriptionsofLastFailingTests() {
+    this.testee.onTestFailure(new TestResult(this.description, null));
+    this.testee.onTestFailure(new TestResult(this.description, null));
+    java.util.ArrayList<Description> descriptions = new java.util.ArrayList<Description>();
+    descriptions.add(this.description);
     descriptions.add(this.description);
     assertEquals(Option.some(descriptions), this.testee.lastFailingTest());
   }
@@ -67,8 +76,17 @@ public class CheckTestHasFailedResultListenerTest {
   @Test
   public void shouldRecordDescriptionOfLastErroringTest() {
     this.testee.onTestError(new TestResult(this.description, null));
-    //assertEquals(Option.some(this.description), this.testee.lastFailingTest());
     java.util.ArrayList<Description> descriptions = new java.util.ArrayList<Description>();
+    descriptions.add(this.description);
+    assertEquals(Option.some(descriptions), this.testee.lastFailingTest());
+  }
+
+  @Test
+  public void shouldRecordMultipleDescriptionsofLastErroringTests() {
+    this.testee.onTestError(new TestResult(this.description, null));
+    this.testee.onTestError(new TestResult(this.description, null));
+    java.util.ArrayList<Description> descriptions = new java.util.ArrayList<Description>();
+    descriptions.add(this.description);
     descriptions.add(this.description);
     assertEquals(Option.some(descriptions), this.testee.lastFailingTest());
   }
