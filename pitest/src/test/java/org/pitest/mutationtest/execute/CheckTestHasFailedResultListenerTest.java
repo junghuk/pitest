@@ -51,7 +51,6 @@ public class CheckTestHasFailedResultListenerTest {
   @Test
   public void shouldRecordDescriptionOfLastFailingTest() {
     this.testee.onTestFailure(new TestResult(this.description, null));
-    //assertEquals(Option.some(this.description), this.testee.lastFailingTest());
     java.util.ArrayList<Description> descriptions = new java.util.ArrayList<Description>();
     descriptions.add(this.description);
     assertEquals(Option.some(descriptions), this.testee.lastFailingTest());
