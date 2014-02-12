@@ -34,6 +34,14 @@ public class PitMojo extends AbstractMojo {
   protected final Predicate<Artifact> filter;
   
   // Concrete List types declared for all fields to work around maven 2 bug
+  
+  /**
+   * List of places where to add to classpath for mutating
+   * 
+   * @parameter expression="${mutationClasspaths}"
+   * 
+   */
+  protected ArrayList<String>        mutationClasspaths;
 
   /**
    * Classes to include in mutation test
@@ -331,6 +339,10 @@ public class PitMojo extends AbstractMojo {
       return null;
     }
     return executionProject.getBasedir();
+  }
+
+  public List<String> getMutationClasspaths() {
+    return this.mutationClasspaths;
   }
 
   public List<String> getTargetClasses() {

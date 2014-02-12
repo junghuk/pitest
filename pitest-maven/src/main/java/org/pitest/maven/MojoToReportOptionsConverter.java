@@ -65,11 +65,15 @@ public class MojoToReportOptionsConverter {
     final ReportOptions data = new ReportOptions();
 
     if (this.mojo.getProject().getBuild() != null) {
+      Collection<String> classpaths = this.mojo.getMutationClasspaths();
+      if (classpaths == null) {
+        classpaths = new ArrayList<String>();
+      }
+      classpaths.add(this.mojo.getProject().getBuild().getOutputDirectory());    // Also add the current ouput directory as a "default"
       Log.getLogger().info(
           "Mutating from "
-              + this.mojo.getProject().getBuild().getOutputDirectory());
-      data.setCodePaths(Collections.singleton(this.mojo.getProject().getBuild()
-          .getOutputDirectory()));
+              + classpaths.toString());
+      data.setCodePaths(classpaths);
     }
 
     data.setClassPathElements(classPath);
