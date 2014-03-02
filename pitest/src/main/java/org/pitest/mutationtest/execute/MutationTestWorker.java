@@ -177,6 +177,14 @@ public class MutationTestWorker {
       final DefaultStaticConfig staticConfig = new DefaultStaticConfig();
       staticConfig.addTestListener(listener);
 
+      // Hack to add listener to all the test units in case of timeout
+      for (TestUnit tu : tests) {
+        if (tu instanceof MutationTimeoutDecorator) {
+          MutationTimeoutDecorator decorator = (MutationTimeoutDecorator)tu;
+          decorator.setListener(listener);
+        }
+      }
+
       final Pitest pit = new Pitest(staticConfig);
       //pit.run(c, createEarlyExitTestGroup(tests));
       pit.run(c, tests);
