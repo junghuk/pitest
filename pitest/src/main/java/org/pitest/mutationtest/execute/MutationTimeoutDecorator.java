@@ -31,6 +31,7 @@ public final class MutationTimeoutDecorator extends TestUnitDecorator {
   private final TimeoutLengthStrategy timeOutStrategy;
   private final SideEffect            timeOutSideEffect;
   private final long                  executionTime;
+  private CheckTestHasFailedResultListener listener;
 
   public MutationTimeoutDecorator(final TestUnit child,
       final SideEffect timeOutSideEffect,
@@ -39,6 +40,10 @@ public final class MutationTimeoutDecorator extends TestUnitDecorator {
     this.timeOutSideEffect = timeOutSideEffect;
     this.executionTime = executionTime;
     this.timeOutStrategy = timeStrategy;
+  }
+
+  public void setListener(CheckTestHasFailedResultListener listener) {
+    this.listener = listener;
   }
 
   @Override
@@ -50,7 +55,8 @@ public final class MutationTimeoutDecorator extends TestUnitDecorator {
     final FutureTask<?> future = createFutureForChildTestUnit(loader, rc);
     executeFutureWithTimeOut(maxTime, future, rc);
     if (!future.isDone()) {
-      this.timeOutSideEffect.apply();
+      //this.timeOutSideEffect.apply();
+      listener.onTestError(new org.pitest.testapi.TestResult(this.child().getDescription(), null, org.pitest.testapi.TestUnitState.FINISHED));
     }
 
   }
