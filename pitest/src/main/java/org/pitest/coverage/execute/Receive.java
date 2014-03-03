@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.pitest.classinfo.ClassName;
 import org.pitest.coverage.BlockLocation;
+import java.util.logging.Logger;
+
 import org.pitest.coverage.CoverageResult;
 import org.pitest.functional.SideEffect1;
 import org.pitest.mutationtest.engine.Location;
@@ -19,12 +21,16 @@ import org.pitest.util.SafeDataInputStream;
 
 import sun.pitest.CodeCoverageStore;
 
+import org.pitest.util.Log;
+
 final class Receive implements ReceiveStrategy {
 
   private final Map<Integer, ClassName>     classIdToName = new ConcurrentHashMap<Integer, ClassName>();
   private final Map<Long, BlockLocation>    probeToBlock  = new ConcurrentHashMap<Long, BlockLocation>();
 
   private final SideEffect1<CoverageResult> handler;
+
+  private static final Logger LOG = Log.getLogger();
 
   Receive(final SideEffect1<CoverageResult> handler) {
     this.handler = handler;
@@ -79,6 +85,12 @@ final class Receive implements ReceiveStrategy {
     if (cr.isGreenTest()) {
       this.handler.apply(cr);
     }
+<<<<<<< HEAD
+=======
+    else {
+      LOG.fine("Test " + cr.getTestUnitDescription().getQualifiedName() + " did not pass coverage! (AWSHI)");
+    }
+>>>>>>> Also log which tests did not pass
     //this.handler.apply(createCoverageResult(is, d, hits));
   }
 
@@ -102,4 +114,17 @@ final class Receive implements ReceiveStrategy {
     return cr;
   }
 
+<<<<<<< HEAD
+=======
+  private ClassStatistics getStatisticsForClass(
+      final Map<Integer, ClassStatistics> hits, final int classId) {
+    ClassStatistics stats = hits.get(classId);
+    if (stats == null) {
+      stats = new ClassStatistics(this.classIdToName.get(classId));
+      hits.put(classId, stats);
+    }
+    return stats;
+  }
+
+>>>>>>> Also log which tests did not pass
 }
