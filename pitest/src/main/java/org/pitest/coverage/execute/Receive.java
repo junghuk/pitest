@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import java.util.logging.Logger;
+
 
 import org.pitest.coverage.ClassStatistics;
 import org.pitest.coverage.CoverageResult;
@@ -15,10 +17,14 @@ import org.pitest.util.SafeDataInputStream;
 
 import sun.pitest.CodeCoverageStore;
 
+import org.pitest.util.Log;
+
 final class Receive implements ReceiveStrategy {
 
   private final Map<Integer, String>        classIdToName = new ConcurrentHashMap<Integer, String>();
   private final SideEffect1<CoverageResult> handler;
+
+  private static final Logger LOG = Log.getLogger();
 
   Receive(final SideEffect1<CoverageResult> handler) {
     this.handler = handler;
@@ -49,7 +55,14 @@ final class Receive implements ReceiveStrategy {
       readLineHit(is, hits);
     }
 
-    this.handler.apply(createCoverageResult(is, d, hits));
+    CoverageResult cr = createCoverageResult(is, d, hits);
+    if (cr.isGreenTest()) {
+      this.handler.apply(cr);
+    }
+    else {
+      LOG.fine("Test " + cr.getTestUnitDescription().getQualifiedName() + " did not pass coverage! (AWSHI)");
+    }
+    //this.handler.apply(createCoverageResult(is, d, hits));
   }
 
   private void readLineHit(final SafeDataInputStream is,
