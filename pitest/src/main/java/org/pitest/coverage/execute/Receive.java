@@ -88,7 +88,7 @@ final class Receive implements ReceiveStrategy {
 <<<<<<< HEAD
 =======
     else {
-      LOG.fine("Test " + cr.getTestUnitDescription().getQualifiedName() + " did not pass coverage! (AWSHI)");
+      LOG.info("Test " + cr.getTestUnitDescription().getQualifiedName() + " did not pass coverage! (AWSHI)");
     }
 >>>>>>> Also log which tests did not pass
     //this.handler.apply(createCoverageResult(is, d, hits));
