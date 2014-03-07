@@ -55,8 +55,8 @@ public final class MutationTimeoutDecorator extends TestUnitDecorator {
     final FutureTask<?> future = createFutureForChildTestUnit(loader, rc);
     executeFutureWithTimeOut(maxTime, future, rc);
     if (!future.isDone()) {
-      //this.timeOutSideEffect.apply();
-      listener.onTestError(new org.pitest.testapi.TestResult(this.child().getDescription(), null, org.pitest.testapi.TestUnitState.FINISHED));
+      this.timeOutSideEffect.apply();
+      //listener.onTestError(new org.pitest.testapi.TestResult(this.child().getDescription(), null, org.pitest.testapi.TestUnitState.FINISHED));
     }
 
   }
