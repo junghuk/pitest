@@ -60,7 +60,7 @@ final class Receive implements ReceiveStrategy {
       this.handler.apply(cr);
     }
     else {
-      LOG.fine("Test " + cr.getTestUnitDescription().getQualifiedName() + " did not pass coverage! (AWSHI)");
+      LOG.info("Test " + cr.getTestUnitDescription().getQualifiedName() + " did not pass coverage! (AWSHI)");
     }
     //this.handler.apply(createCoverageResult(is, d, hits));
   }
