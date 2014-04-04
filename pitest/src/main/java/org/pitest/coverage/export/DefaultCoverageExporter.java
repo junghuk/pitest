@@ -10,6 +10,7 @@ import java.util.List;
 import org.pitest.coverage.CoverageExporter;
 import org.pitest.coverage.LineCoverage;
 import org.pitest.util.ResultOutputStrategy;
+import org.pitest.util.StringUtil;
 import org.pitest.util.Unchecked;
 
 /**
@@ -47,7 +48,7 @@ public class DefaultCoverageExporter implements CoverageExporter {
     final List<String> ts = new ArrayList<String>(each.getTests());
     Collections.sort(ts);
     for (final String test : ts) {
-      write(out, "<test name='" + test + "'/>\n");
+      write(out, "<test name='" + StringUtil.escapeBasicHtmlChars(test) + "'/>\n");
     }
     write(out, "</tests>\n");
     write(out, "</line>\n");
