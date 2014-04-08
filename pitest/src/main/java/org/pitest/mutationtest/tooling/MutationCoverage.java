@@ -116,37 +116,39 @@ public class MutationCoverage {
 
     final MutationStatisticsListener stats = new MutationStatisticsListener();
 
-    final MutationEngine engine = this.strategies.factory().createEngine(
-        this.data.isMutateStaticInitializers(),
-        Prelude.or(this.data.getExcludedMethods()),
-        this.data.getLoggingClasses(), this.data.getMutators(),
-        this.data.isDetectInlinedCode());
+    if (this.settings.runMutations()) {
+        final MutationEngine engine = this.strategies.factory().createEngine(
+            this.data.isMutateStaticInitializers(),
+            Prelude.or(this.data.getExcludedMethods()),
+            this.data.getLoggingClasses(), this.data.getMutators(),
+            this.data.isDetectInlinedCode());
 
-    final List<MutationResultListener> config = createConfig(t0, coverageData,
+        final List<MutationResultListener> config = createConfig(t0, coverageData,
         stats, engine);
 
-    history().initialize();
+        history().initialize();
 
-    this.timings.registerStart(Timings.Stage.BUILD_MUTATION_TESTS);
-    final List<MutationAnalysisUnit> tus = buildMutationTests(coverageData,
-        engine);
-    this.timings.registerEnd(Timings.Stage.BUILD_MUTATION_TESTS);
+        this.timings.registerStart(Timings.Stage.BUILD_MUTATION_TESTS);
+        final List<MutationAnalysisUnit> tus = buildMutationTests(coverageData,
+            engine);
+        this.timings.registerEnd(Timings.Stage.BUILD_MUTATION_TESTS);
 
-    LOG.info("Created  " + tus.size() + " mutation test units");
-    checkMutationsFound(tus);
+        LOG.info("Created  " + tus.size() + " mutation test units");
+        checkMutationsFound(tus);
 
-    recordClassPath(coverageData);
+        recordClassPath(coverageData);
 
-    LOG.fine("Used memory before analysis start "
-        + ((runtime.totalMemory() - runtime.freeMemory()) / MB) + " mb");
-    LOG.fine("Free Memory before analysis start " + (runtime.freeMemory() / MB)
-        + " mb");
+        LOG.fine("Used memory before analysis start "
+            + ((runtime.totalMemory() - runtime.freeMemory()) / MB) + " mb");
+        LOG.fine("Free Memory before analysis start " + (runtime.freeMemory() / MB)
+            + " mb");
 
-    final MutationAnalysisExecutor mae = new MutationAnalysisExecutor(
-        numberOfThreads(), config);
-    this.timings.registerStart(Timings.Stage.RUN_MUTATION_TESTS);
-    mae.run(tus);
-    this.timings.registerEnd(Timings.Stage.RUN_MUTATION_TESTS);
+        final MutationAnalysisExecutor mae = new MutationAnalysisExecutor(
+            numberOfThreads(), config);
+        this.timings.registerStart(Timings.Stage.RUN_MUTATION_TESTS);
+        mae.run(tus);
+        this.timings.registerEnd(Timings.Stage.RUN_MUTATION_TESTS);
+    }
 
     LOG.info("Completed in " + timeSpan(t0));
 

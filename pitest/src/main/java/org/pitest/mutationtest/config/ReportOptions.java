@@ -121,6 +121,7 @@ public class ReportOptions {
   private boolean                        includeLaunchClasspath         = true;
 
   private Properties                     properties;
+  private boolean                        shouldRunMutations             = true;
 
   public boolean isVerbose() {
     return this.verbose;
@@ -546,6 +547,14 @@ public class ReportOptions {
 
   public void setFreeFormProperties(Properties props) {
     this.properties = props;
+  }
+
+  public void setRunMutations(final boolean b) {
+    this.shouldRunMutations = b;
+  }
+
+  public boolean shouldRunMutations() {
+    return this.shouldRunMutations;
   }
 
   @Override

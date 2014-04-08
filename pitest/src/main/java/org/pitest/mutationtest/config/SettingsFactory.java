@@ -167,4 +167,8 @@ public class SettingsFactory {
     return found.iterator().next();
   }
 
+  public boolean runMutations() {
+    return this.options.shouldRunMutations();
+  }
+
 }
