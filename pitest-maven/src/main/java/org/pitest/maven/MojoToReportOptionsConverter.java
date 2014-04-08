@@ -124,6 +124,8 @@ public class MojoToReportOptionsConverter {
     data.setMutationEngine(this.mojo.getMutationEngine());
     data.setJavaExecutable(this.mojo.getJavaExecutable());
 
+    data.setRunMutations(this.mojo.isRunMutations());
+
     return data;
   }
 

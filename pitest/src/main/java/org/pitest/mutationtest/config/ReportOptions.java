@@ -122,6 +122,8 @@ public class ReportOptions {
 
   private boolean                        includeLaunchClasspath         = true;
 
+  private boolean                        shouldRunMutations             = true;
+
   public boolean isVerbose() {
     return this.verbose;
   }
@@ -560,6 +562,14 @@ public class ReportOptions {
 
   public boolean isIncludeLaunchClasspath() {
     return this.includeLaunchClasspath;
+  }
+
+  public void setRunMutations(final boolean b) {
+    this.shouldRunMutations = b;
+  }
+
+  public boolean shouldRunMutations() {
+    return this.shouldRunMutations;
   }
 
   @Override

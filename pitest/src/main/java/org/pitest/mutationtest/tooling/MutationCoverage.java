@@ -124,36 +124,38 @@ public class MutationCoverage {
 
     final MutationStatisticsListener stats = new MutationStatisticsListener();
 
-    final MutationEngine engine = this.strategies.factory().createEngine(
-        this.data.isMutateStaticInitializers(),
-        Prelude.or(this.data.getExcludedMethods()),
-        this.data.getLoggingClasses(), this.data.getMutators(),
-        this.data.isDetectInlinedCode());
+    if (this.settings.runMutations()) {
+        final MutationEngine engine = this.strategies.factory().createEngine(
+            this.data.isMutateStaticInitializers(),
+            Prelude.or(this.data.getExcludedMethods()),
+            this.data.getLoggingClasses(), this.data.getMutators(),
+            this.data.isDetectInlinedCode());
 
-    final DefaultStaticConfig staticConfig = createConfig(t0, coverageData,
-        stats, engine);
+        final DefaultStaticConfig staticConfig = createConfig(t0, coverageData,
+            stats, engine);
 
-    history().initialize();
+        history().initialize();
 
-    this.timings.registerStart(Timings.Stage.BUILD_MUTATION_TESTS);
-    final List<? extends TestUnit> tus = buildMutationTests(coverageData,
-        engine);
-    this.timings.registerEnd(Timings.Stage.BUILD_MUTATION_TESTS);
+        this.timings.registerStart(Timings.Stage.BUILD_MUTATION_TESTS);
+        final List<? extends TestUnit> tus = buildMutationTests(coverageData,
+            engine);
+        this.timings.registerEnd(Timings.Stage.BUILD_MUTATION_TESTS);
 
-    LOG.info("Created  " + tus.size() + " mutation test units");
-    checkMutationsFound(tus);
+        LOG.info("Created  " + tus.size() + " mutation test units");
+        checkMutationsFound(tus);
 
-    recordClassPath(coverageData);
+        recordClassPath(coverageData);
 
-    LOG.fine("Used memory before analysis start "
-        + ((runtime.totalMemory() - runtime.freeMemory()) / MB) + " mb");
-    LOG.fine("Free Memory before analysis start " + (runtime.freeMemory() / MB)
-        + " mb");
+        LOG.fine("Used memory before analysis start "
+            + ((runtime.totalMemory() - runtime.freeMemory()) / MB) + " mb");
+        LOG.fine("Free Memory before analysis start " + (runtime.freeMemory() / MB)
+            + " mb");
 
-    final Pitest pit = new Pitest(staticConfig);
-    this.timings.registerStart(Timings.Stage.RUN_MUTATION_TESTS);
-    pit.run(createContainer(), tus);
-    this.timings.registerEnd(Timings.Stage.RUN_MUTATION_TESTS);
+        final Pitest pit = new Pitest(staticConfig);
+        this.timings.registerStart(Timings.Stage.RUN_MUTATION_TESTS);
+        pit.run(createContainer(), tus);
+        this.timings.registerEnd(Timings.Stage.RUN_MUTATION_TESTS);
+    }
 
     LOG.info("Completed in " + timeSpan(t0));
 

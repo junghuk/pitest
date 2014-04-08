@@ -255,6 +255,13 @@ public class PitMojo extends AbstractMojo {
   private String                mutationEngine;
 
   /**
+   * Parameter to set if to run mutations
+   *
+   * @parameter default-value="true" expression="${runMutations}"
+   */
+  private boolean               runMutations;
+
+  /**
    * <i>Internal</i>: Project to interact with.
    * 
    * @parameter expression="${project}"
@@ -471,6 +478,10 @@ public class PitMojo extends AbstractMojo {
 
   public void setJavaExecutable(String javaExecutable) {
     this.jvm = javaExecutable;
+  }
+
+  public boolean isRunMutations() {
+    return this.runMutations;
   }
 
 }
