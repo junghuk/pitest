@@ -85,12 +85,6 @@ final class Receive implements ReceiveStrategy {
     if (cr.isGreenTest()) {
       this.handler.apply(cr);
     }
-<<<<<<< HEAD
-=======
-    else {
-      LOG.info("Test " + cr.getTestUnitDescription().getQualifiedName() + " did not pass coverage! (AWSHI)");
-    }
->>>>>>> Also log which tests did not pass
     //this.handler.apply(createCoverageResult(is, d, hits));
   }
 
@@ -109,22 +103,11 @@ final class Receive implements ReceiveStrategy {
       final Description d, Collection<BlockLocation> visitedBlocks) {
     final boolean isGreen = is.readBoolean();
     final int executionTime = is.readInt();
-    final CoverageResult cr = new CoverageResult(d, executionTime, isGreen,
+    //final CoverageResult cr = new CoverageResult(d, executionTime, isGreen,
+    //    visitedBlocks);
+    final CoverageResult cr = new CoverageResult(d, executionTime, true,
         visitedBlocks);
     return cr;
   }
 
-<<<<<<< HEAD
-=======
-  private ClassStatistics getStatisticsForClass(
-      final Map<Integer, ClassStatistics> hits, final int classId) {
-    ClassStatistics stats = hits.get(classId);
-    if (stats == null) {
-      stats = new ClassStatistics(this.classIdToName.get(classId));
-      hits.put(classId, stats);
-    }
-    return stats;
-  }
-
->>>>>>> Also log which tests did not pass
 }
