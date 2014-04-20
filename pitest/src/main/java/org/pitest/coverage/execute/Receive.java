@@ -80,7 +80,9 @@ final class Receive implements ReceiveStrategy {
       final Description d, final Map<Integer, ClassStatistics> hits) {
     final boolean isGreen = is.readBoolean();
     final int executionTime = is.readInt();
-    final CoverageResult cr = new CoverageResult(d, executionTime, isGreen,
+    //final CoverageResult cr = new CoverageResult(d, executionTime, isGreen,
+    //    hits.values());
+    final CoverageResult cr = new CoverageResult(d, executionTime, true,
         hits.values());
     return cr;
   }
