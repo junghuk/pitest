@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,23 +17,26 @@ package org.pitest.mutationtest.engine.gregor.mutators;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.pitest.mutationtest.engine.MutationIdentifier;
-import org.pitest.mutationtest.engine.gregor.Context;
 import org.pitest.mutationtest.engine.gregor.MethodInfo;
 import org.pitest.mutationtest.engine.gregor.MethodMutatorFactory;
+import org.pitest.mutationtest.engine.gregor.MutationContext;
 
 public enum IncrementsMutator implements MethodMutatorFactory {
 
   INCREMENTS_MUTATOR;
 
-  public MethodVisitor create(final Context context,
+  @Override
+  public MethodVisitor create(final MutationContext context,
       final MethodInfo methodInfo, final MethodVisitor methodVisitor) {
     return new IncrementsMethodVisitor(this, context, methodVisitor);
   }
 
+  @Override
   public String getGloballyUniqueId() {
     return this.getClass().getName();
   }
 
+  @Override
   public String getName() {
     return name();
   }
@@ -42,11 +45,11 @@ public enum IncrementsMutator implements MethodMutatorFactory {
 class IncrementsMethodVisitor extends MethodVisitor {
 
   private final MethodMutatorFactory factory;
-  private final Context              context;
+  private final MutationContext      context;
 
   public IncrementsMethodVisitor(final MethodMutatorFactory factory,
-      final Context context, final MethodVisitor delegateMethodVisitor) {
-    super(Opcodes.ASM4, delegateMethodVisitor);
+      final MutationContext context, final MethodVisitor delegateMethodVisitor) {
+    super(Opcodes.ASM5, delegateMethodVisitor);
     this.factory = factory;
     this.context = context;
   }

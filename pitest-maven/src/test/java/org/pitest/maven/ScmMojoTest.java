@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Scm;
@@ -20,7 +21,9 @@ import org.apache.maven.scm.ScmFileStatus;
 import org.apache.maven.scm.command.status.StatusScmResult;
 import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.repository.ScmRepository;
+import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.pitest.mutationtest.config.PluginServices;
 import org.pitest.mutationtest.config.ReportOptions;
 
 public class ScmMojoTest extends BasePitMojoTest {
@@ -42,7 +45,8 @@ public class ScmMojoTest extends BasePitMojoTest {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    this.testee = new ScmMojo(this.executionStrategy, this.manager, filter);
+    this.testee = new ScmMojo(this.executionStrategy, this.manager,
+        this.filter, this.plugins);
     this.testee.setScmRootDir(new File("foo"));
     when(this.project.getBuild()).thenReturn(this.build);
     when(this.build.getSourceDirectory()).thenReturn("foo");
@@ -90,7 +94,7 @@ public class ScmMojoTest extends BasePitMojoTest {
     setFileWithStatus(ScmFileStatus.ADDED);
     this.testee.execute();
     verify(this.executionStrategy).execute(any(File.class),
-        any(ReportOptions.class));
+        any(ReportOptions.class), any(PluginServices.class), anyMap());
   }
 
   private void setFileWithStatus(final ScmFileStatus status)
@@ -106,7 +110,7 @@ public class ScmMojoTest extends BasePitMojoTest {
     setFileWithStatus(ScmFileStatus.MODIFIED);
     this.testee.execute();
     verify(this.executionStrategy).execute(any(File.class),
-        any(ReportOptions.class));
+        any(ReportOptions.class), any(PluginServices.class), anyMap());
   }
 
   public void testUnknownAndDeletedClassesAreNotMutationTested()
@@ -119,7 +123,7 @@ public class ScmMojoTest extends BasePitMojoTest {
                 "foo/bar/Bar.java", ScmFileStatus.UNKNOWN))));
     this.testee.execute();
     verify(this.executionStrategy, never()).execute(any(File.class),
-        any(ReportOptions.class));
+        any(ReportOptions.class), any(PluginServices.class), anyMap());
   }
 
   public void testCanOverrideInspectedStatus() throws Exception {
@@ -130,7 +134,7 @@ public class ScmMojoTest extends BasePitMojoTest {
         createPomWithConfiguration("<include><value>DELETED</value><value>UNKNOWN</value></include>"));
     this.testee.execute();
     verify(this.executionStrategy, times(1)).execute(any(File.class),
-        any(ReportOptions.class));
+        any(ReportOptions.class), any(PluginServices.class), anyMap());
   }
 
   public void testDoesNotAnalysePomProjects() throws Exception {
@@ -139,7 +143,7 @@ public class ScmMojoTest extends BasePitMojoTest {
     when(this.project.getPackaging()).thenReturn("pom");
     this.testee.execute();
     verify(this.executionStrategy, never()).execute(any(File.class),
-        any(ReportOptions.class));
+        any(ReportOptions.class), any(PluginServices.class), anyMap());
   }
 
   private void setupConnection() {
@@ -150,5 +154,9 @@ public class ScmMojoTest extends BasePitMojoTest {
   private void setupToReturnNoModifiedFiles() throws ScmException {
     when(this.manager.status(any(ScmRepository.class), any(ScmFileSet.class)))
         .thenReturn(new StatusScmResult("", Collections.<ScmFile> emptyList()));
+  }
+
+  private Map<String, String> anyMap() {
+    return Matchers.<Map<String, String>> any();
   }
 }

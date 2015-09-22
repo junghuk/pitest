@@ -48,7 +48,6 @@ public class Log {
   }
 
   private static void setLevel(final Level level) {
-
     LOGGER.setLevel(level);
     for (final Handler each : LOGGER.getHandlers()) {
       each.setLevel(level);
@@ -57,13 +56,13 @@ public class Log {
 
   static class PlainFormatter extends Formatter {
 
-    private final static String LINE_SEPARATOR = System
-                                                   .getProperty("line.separator");
+    private static final String LINE_SEPARATOR = System
+        .getProperty("line.separator");
     private final DateFormat    dateFormat     = DateFormat.getTimeInstance();
 
     @Override
     public String format(final LogRecord record) {
-      final StringBuffer buf = new StringBuffer(180);
+      final StringBuilder buf = new StringBuilder(180);
 
       buf.append(this.dateFormat.format(new Date(record.getMillis())));
       buf.append(" PIT >> ");

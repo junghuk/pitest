@@ -2,6 +2,9 @@ package sun.pitest;
 
 public interface InvokeReceiver {
 
-  public abstract void registerClass(int id, String className);
+  void registerClass(int id, String className);
+
+  void registerProbes(int classId, String methodName, String methodDesc,
+      int firstProbe, int lastProbe);
 
 }

@@ -11,15 +11,29 @@ import org.pitest.mutationtest.build.TestPrioritiserFactory;
 import org.pitest.mutationtest.filter.MutationFilterFactory;
 import org.pitest.plugin.ClientClasspathPlugin;
 import org.pitest.plugin.ToolClasspathPlugin;
+import org.pitest.testapi.TestPluginFactory;
+import org.pitest.util.IsolationUtils;
 import org.pitest.util.ServiceLoader;
 
 public class PluginServices {
 
+  private final ClassLoader loader;
+
+  public PluginServices(ClassLoader loader) {
+    this.loader = loader;
+  }
+
+  public static PluginServices makeForContextLoader() {
+    return new PluginServices(IsolationUtils.getContextClassLoader());
+  }
+
   /**
    * Lists all plugin classes that must be present on the classpath of the
    * controlling process only.
+   *
+   * @return list of plugins
    */
-  public static Iterable<? extends ToolClasspathPlugin> findToolClasspathPlugins() {
+  public Iterable<? extends ToolClasspathPlugin> findToolClasspathPlugins() {
     final List<ToolClasspathPlugin> l = new ArrayList<ToolClasspathPlugin>();
     l.addAll(findListeners());
     l.addAll(findGroupers());
@@ -32,35 +46,40 @@ public class PluginServices {
    * Lists all plugin classes that must be present on the classpath of the code
    * under test at runtime
    */
-  public static Iterable<? extends ClientClasspathPlugin> findClientClasspathPlugins() {
+  public Iterable<? extends ClientClasspathPlugin> findClientClasspathPlugins() {
     final List<ClientClasspathPlugin> l = new ArrayList<ClientClasspathPlugin>();
     l.addAll(findMutationEngines());
+    l.addAll(findTestFrameworkPlugins());
     l.addAll(nullPlugins());
     return l;
   }
-  
-  static Collection<? extends MutationGrouperFactory> findGroupers() {
-    return ServiceLoader.load(MutationGrouperFactory.class);
-  }
-  
-  static Collection<? extends MutationFilterFactory> findFilters() {
-    return ServiceLoader.load(MutationFilterFactory.class);
+
+  Collection<? extends TestPluginFactory> findTestFrameworkPlugins() {
+    return ServiceLoader.load(TestPluginFactory.class, this.loader);
   }
 
-  static Collection<? extends MutationResultListenerFactory> findListeners() {
-    return ServiceLoader.load(MutationResultListenerFactory.class);
+  Collection<? extends MutationGrouperFactory> findGroupers() {
+    return ServiceLoader.load(MutationGrouperFactory.class, this.loader);
   }
 
-  static Collection<? extends MutationEngineFactory> findMutationEngines() {
-    return ServiceLoader.load(MutationEngineFactory.class);
+  Collection<? extends MutationFilterFactory> findFilters() {
+    return ServiceLoader.load(MutationFilterFactory.class, this.loader);
   }
 
-  static Collection<? extends TestPrioritiserFactory> findTestPrioritisers() {
-    return ServiceLoader.load(TestPrioritiserFactory.class);
+  Collection<? extends MutationResultListenerFactory> findListeners() {
+    return ServiceLoader.load(MutationResultListenerFactory.class, this.loader);
   }
-  
-  private static Collection<ClientClasspathPlugin> nullPlugins() {
-    return ServiceLoader.load(ClientClasspathPlugin.class);
+
+  Collection<? extends MutationEngineFactory> findMutationEngines() {
+    return ServiceLoader.load(MutationEngineFactory.class, this.loader);
   }
-  
+
+  Collection<? extends TestPrioritiserFactory> findTestPrioritisers() {
+    return ServiceLoader.load(TestPrioritiserFactory.class, this.loader);
+  }
+
+  private Collection<ClientClasspathPlugin> nullPlugins() {
+    return ServiceLoader.load(ClientClasspathPlugin.class, this.loader);
+  }
+
 }

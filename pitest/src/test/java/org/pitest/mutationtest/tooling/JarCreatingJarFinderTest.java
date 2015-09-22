@@ -1,12 +1,12 @@
 /*
  * Copyright 2011 Henry Coles
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,20 +29,25 @@ import java.util.jar.Manifest;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pitest.boot.HotSwapAgent;
 import org.pitest.classinfo.ClassByteArraySource;
 import org.pitest.functional.Option;
-import org.pitest.mutationtest.tooling.JarCreatingJarFinder;
+import org.pitest.util.PitError;
 
 public class JarCreatingJarFinderTest {
 
-  private JarCreatingJarFinder testee;
+  private JarCreatingJarFinder   testee;
 
   @Mock
-  private ClassByteArraySource byteSource;
+  private ClassByteArraySource   byteSource;
+
+  @Rule
+  public final ExpectedException thrown = ExpectedException.none();
 
   @Before
   public void setUp() {
@@ -106,6 +111,16 @@ public class JarCreatingJarFinderTest {
   public void shouldAddPITToTheBootClassPath() throws IOException {
     final String actual = getGeneratedManifestAttribute(JarCreatingJarFinder.BOOT_CLASSPATH);
     assertTrue(!actual.equals(""));
+  }
+
+  @Test
+  public void shouldFailOnUnreadableRessources() throws IOException {
+    this.thrown.expect(PitError.class);
+
+    when(this.byteSource.getBytes(anyString())).thenReturn(
+        Option.<byte[]> none());
+
+    this.testee.getJarLocation();
   }
 
   private void assertGeneratedManifestEntryEquals(final String key,

@@ -1,16 +1,16 @@
 /*
  * Copyright 2010 Henry Coles
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * 
- * Unless required by applicable law or agreed to in writing, 
- * software distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and limitations under the License. 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and limitations under the License.
  */
 package org.pitest.dependency;
 
@@ -27,13 +27,14 @@ class DependencyClassVisitor extends ClassVisitor {
 
   protected DependencyClassVisitor(final ClassVisitor visitor,
       final SideEffect1<DependencyAccess> typeReceiver) {
-    super(Opcodes.ASM4, visitor);
+    super(Opcodes.ASM5, visitor);
     this.typeReceiver = filterOutJavaLangObject(typeReceiver);
   }
 
   private SideEffect1<DependencyAccess> filterOutJavaLangObject(
       final SideEffect1<DependencyAccess> child) {
     return new SideEffect1<DependencyAccess>() {
+      @Override
       public void apply(final DependencyAccess a) {
         if (!a.getDest().getOwner().equals("java/lang/Object")) {
           child.apply(a);
@@ -69,17 +70,17 @@ class DependencyClassVisitor extends ClassVisitor {
     public DependencyAnalysisMethodVisitor(final Member member,
         final MethodVisitor methodVisitor,
         final SideEffect1<DependencyAccess> typeReceiver) {
-      super(Opcodes.ASM4, methodVisitor);
+      super(Opcodes.ASM5, methodVisitor);
       this.typeReceiver = typeReceiver;
       this.member = member;
     }
 
     @Override
     public void visitMethodInsn(final int opcode, final String owner,
-        final String name, final String desc) {
+        final String name, final String desc, boolean itf) {
       this.typeReceiver.apply(new DependencyAccess(this.member, new Member(
           owner, name)));
-      this.mv.visitMethodInsn(opcode, owner, name, desc);
+      this.mv.visitMethodInsn(opcode, owner, name, desc, itf);
     }
 
     @Override

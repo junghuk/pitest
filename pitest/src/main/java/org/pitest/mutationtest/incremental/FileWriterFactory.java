@@ -17,7 +17,9 @@ public class FileWriterFactory implements WriterFactory {
     this.file = file;
   }
 
+  @Override
   public PrintWriter create() {
+    this.file.getParentFile().mkdirs();
     try {
       if (this.writer == null) {
         this.writer = new PrintWriter(new OutputStreamWriter(
@@ -30,6 +32,7 @@ public class FileWriterFactory implements WriterFactory {
     }
   }
 
+  @Override
   public void close() {
     if (this.writer != null) {
       this.writer.close();

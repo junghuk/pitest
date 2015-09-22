@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,17 +30,17 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.pitest.functional.F2;
 import org.pitest.mutationtest.engine.MutationIdentifier;
-import org.pitest.mutationtest.engine.gregor.Context;
 import org.pitest.mutationtest.engine.gregor.MethodInfo;
 import org.pitest.mutationtest.engine.gregor.MethodMutatorFactory;
+import org.pitest.mutationtest.engine.gregor.MutationContext;
 
 class MethodCallMethodVisitor extends MethodVisitor {
 
-  private final static Map<Type, Integer>   RETURN_TYPE_MAP = new HashMap<Type, Integer>();
+  private static final Map<Type, Integer>   RETURN_TYPE_MAP = new HashMap<Type, Integer>();
 
   private final F2<String, String, Boolean> filter;
   private final MethodMutatorFactory        factory;
-  private final Context                     context;
+  private final MutationContext             context;
   private final MethodInfo                  methodInfo;
 
   static {
@@ -55,10 +55,10 @@ class MethodCallMethodVisitor extends MethodVisitor {
   }
 
   public MethodCallMethodVisitor(final MethodInfo methodInfo,
-      final Context context, final MethodVisitor writer,
+      final MutationContext context, final MethodVisitor writer,
       final MethodMutatorFactory factory,
       final F2<String, String, Boolean> filter) {
-    super(Opcodes.ASM4, writer);
+    super(Opcodes.ASM5, writer);
     this.factory = factory;
     this.filter = filter;
     this.context = context;
@@ -67,11 +67,11 @@ class MethodCallMethodVisitor extends MethodVisitor {
 
   @Override
   public void visitMethodInsn(final int opcode, final String owner,
-      final String name, final String desc) {
+      final String name, final String desc, boolean itf) {
 
     if (!this.filter.apply(name, desc)
         || isCallToSuperOrOwnConstructor(name, owner)) {
-      this.mv.visitMethodInsn(opcode, owner, name, desc);
+      this.mv.visitMethodInsn(opcode, owner, name, desc, itf);
     } else {
       final MutationIdentifier newId = this.context.registerMutation(
           this.factory, "removed call to " + owner + "::" + name);
@@ -83,7 +83,7 @@ class MethodCallMethodVisitor extends MethodVisitor {
         putReturnValueOnStack(desc, name);
 
       } else {
-        this.mv.visitMethodInsn(opcode, owner, name, desc);
+        this.mv.visitMethodInsn(opcode, owner, name, desc, itf);
       }
     }
 

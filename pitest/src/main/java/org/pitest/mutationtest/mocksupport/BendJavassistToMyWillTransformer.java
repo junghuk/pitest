@@ -6,6 +6,7 @@ import java.security.ProtectionDomain;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.pitest.bytecode.FrameOptions;
 import org.pitest.functional.predicate.Predicate;
 
 public class BendJavassistToMyWillTransformer implements ClassFileTransformer {
@@ -16,17 +17,20 @@ public class BendJavassistToMyWillTransformer implements ClassFileTransformer {
     this.filter = filter;
   }
 
+  @Override
   public byte[] transform(final ClassLoader loader, final String className,
       final Class<?> classBeingRedefined,
       final ProtectionDomain protectionDomain, final byte[] classfileBuffer)
-      throws IllegalClassFormatException {
+          throws IllegalClassFormatException {
 
     if (shouldInclude(className)) {
 
       final ClassReader reader = new ClassReader(classfileBuffer);
-      final ClassWriter writer = new ClassWriter(0);
+      final ClassWriter writer = new ClassWriter(
+          FrameOptions.pickFlags(classfileBuffer));
 
-      reader.accept(new JavassistInputStreamInterceptorAdapater(writer), 0);
+      reader.accept(new JavassistInputStreamInterceptorAdapater(writer),
+          ClassReader.EXPAND_FRAMES);
       return writer.toByteArray();
     } else {
       return null;

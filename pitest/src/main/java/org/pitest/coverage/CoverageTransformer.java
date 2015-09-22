@@ -6,13 +6,12 @@ import java.security.ProtectionDomain;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.pitest.bytecode.FrameOptions;
+import org.pitest.classinfo.ComputeClassWriter;
 import org.pitest.classpath.ClassloaderByteArraySource;
-import org.pitest.coverage.codeassist.CoverageClassVisitor;
 import org.pitest.functional.predicate.Predicate;
-import org.pitest.util.ComputeClassWriter;
 
 import sun.pitest.CodeCoverageStore;
 
@@ -25,10 +24,11 @@ public class CoverageTransformer implements ClassFileTransformer {
     this.filter = filter;
   }
 
+  @Override
   public byte[] transform(final ClassLoader loader, final String className,
       final Class<?> classBeingRedefined,
       final ProtectionDomain protectionDomain, final byte[] classfileBuffer)
-      throws IllegalClassFormatException {
+          throws IllegalClassFormatException {
     final boolean include = shouldInclude(className);
     if (include) {
       try {
@@ -48,7 +48,7 @@ public class CoverageTransformer implements ClassFileTransformer {
     final ClassReader reader = new ClassReader(classfileBuffer);
     final ClassWriter writer = new ComputeClassWriter(
         new ClassloaderByteArraySource(loader), this.computeCache,
-        ClassWriter.COMPUTE_FRAMES);
+        FrameOptions.pickFlags(classfileBuffer));
 
     final int id = CodeCoverageStore.registerClass(className);
     reader.accept(new CoverageClassVisitor(id, writer),

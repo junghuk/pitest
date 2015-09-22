@@ -1,17 +1,17 @@
 /*
  * Copyright 2011 Henry Coles and Stefan Penndorf
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * 
- * Unless required by applicable law or agreed to in writing, 
- * software distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
- * limitations under the License. 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.pitest.mutationtest.engine.gregor.mutators.experimental;
 
@@ -19,25 +19,25 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.pitest.mutationtest.engine.MutationIdentifier;
-import org.pitest.mutationtest.engine.gregor.Context;
 import org.pitest.mutationtest.engine.gregor.MethodInfo;
 import org.pitest.mutationtest.engine.gregor.MethodMutatorFactory;
+import org.pitest.mutationtest.engine.gregor.MutationContext;
 
 /**
  * The <code>MemberVariableMutator</code> is a mutator that mutates assignments
  * to member variables by removing them.
- * 
+ *
  * @author Stefan Penndorf &lt;stefan.penndorf@gmail.com&gt;
  */
 public class MemberVariableMutator implements MethodMutatorFactory {
 
   private final class MemberVariableVisitor extends MethodVisitor {
 
-    private final Context context;
+    private final MutationContext context;
 
-    public MemberVariableVisitor(final Context context,
+    public MemberVariableVisitor(final MutationContext context,
         final MethodVisitor delegateVisitor) {
-      super(Opcodes.ASM4, delegateVisitor);
+      super(Opcodes.ASM5, delegateVisitor);
       this.context = context;
     }
 
@@ -62,14 +62,14 @@ public class MemberVariableMutator implements MethodMutatorFactory {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.objectweb.asm.MethodAdapter#visitMethodInsn(int,
      * java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public void visitMethodInsn(final int opcode, final String owner,
-        final String name, final String desc) {
-      super.visitMethodInsn(opcode, owner, name, desc);
+        final String name, final String desc, boolean itf) {
+      super.visitMethodInsn(opcode, owner, name, desc, itf);
     }
 
     private boolean shouldMutate(final String fieldName) {
@@ -81,11 +81,13 @@ public class MemberVariableMutator implements MethodMutatorFactory {
 
   }
 
-  public MethodVisitor create(final Context context,
+  @Override
+  public MethodVisitor create(final MutationContext context,
       final MethodInfo methodInfo, final MethodVisitor methodVisitor) {
     return new MemberVariableVisitor(context, methodVisitor);
   }
 
+  @Override
   public String getGloballyUniqueId() {
     return this.getClass().getName();
   }
@@ -95,6 +97,7 @@ public class MemberVariableMutator implements MethodMutatorFactory {
     return "EXPERIMENTAL_MEMBER_VARIABLE_MUTATOR";
   }
 
+  @Override
   public String getName() {
     return toString();
   }

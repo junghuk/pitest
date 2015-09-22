@@ -6,22 +6,22 @@ import org.objectweb.asm.Opcodes;
 
 class LineFilterMethodAdapter extends MethodVisitor {
 
-  private final static String        DISABLE_REASON = "AVOIDED_METHOD";
+  private static final String        DISABLE_REASON = "AVOIDED_LINE";
 
-  private final Context              context;
+  private final MutationContext      context;
   private final PremutationClassInfo classInfo;
 
-  public LineFilterMethodAdapter(final Context context,
+  public LineFilterMethodAdapter(final MutationContext context,
       final PremutationClassInfo classInfo,
       final MethodVisitor delegateMethodVisitor) {
-    super(Opcodes.ASM4, delegateMethodVisitor);
+    super(Opcodes.ASM5, delegateMethodVisitor);
     this.context = context;
     this.classInfo = classInfo;
   }
 
   @Override
   public void visitLineNumber(final int line, final Label start) {
-    if (this.classInfo.isLoggingLine(line)) {
+    if (this.classInfo.isLineToAvoid(line)) {
       this.context.disableMutations(DISABLE_REASON);
     } else {
       this.context.enableMutatations(DISABLE_REASON);

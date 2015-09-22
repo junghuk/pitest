@@ -8,6 +8,7 @@ import org.pitest.coverage.CoverageResult;
 import org.pitest.functional.SideEffect1;
 import org.pitest.process.ProcessArgs;
 import org.pitest.process.WrappingProcess;
+import org.pitest.util.ExitCode;
 
 public class CoverageProcess {
 
@@ -17,7 +18,7 @@ public class CoverageProcess {
   public CoverageProcess(final ProcessArgs processArgs,
       final CoverageOptions arguments, final ServerSocket socket,
       final List<String> testClases, final SideEffect1<CoverageResult> handler)
-      throws IOException {
+          throws IOException {
     this.process = new WrappingProcess(socket.getLocalPort(), processArgs,
         CoverageSlave.class);
     this.crt = new CoverageCommunicationThread(socket, arguments, testClases,
@@ -29,9 +30,9 @@ public class CoverageProcess {
     this.process.start();
   }
 
-  public void waitToDie() throws InterruptedException {
+  public ExitCode waitToDie() throws InterruptedException {
     try {
-      this.crt.waitToFinish();
+      return this.crt.waitToFinish();
     } finally {
       this.process.destroy();
     }

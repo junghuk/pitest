@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Henry Coles
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,20 +17,15 @@ package org.pitest.mutationtest.execute;
 import static org.pitest.util.Unchecked.translateCheckedException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.pitest.classinfo.ClassName;
 import org.pitest.classpath.ClassPath;
-import org.pitest.execute.Container;
-import org.pitest.execute.DefaultStaticConfig;
-import org.pitest.execute.ExitingResultCollector;
-import org.pitest.execute.MultipleTestGroup;
-import org.pitest.execute.Pitest;
-import org.pitest.execute.containers.ConcreteResultCollector;
-import org.pitest.execute.containers.UnContainer;
 import org.pitest.functional.F3;
 import org.pitest.mutationtest.DetectionStatus;
 import org.pitest.mutationtest.MutationStatusTestPair;
@@ -39,7 +34,14 @@ import org.pitest.mutationtest.engine.Mutater;
 import org.pitest.mutationtest.engine.MutationDetails;
 import org.pitest.mutationtest.engine.MutationIdentifier;
 import org.pitest.mutationtest.mocksupport.JavassistInterceptor;
+import org.pitest.testapi.TestResult;
 import org.pitest.testapi.TestUnit;
+import org.pitest.testapi.execute.Container;
+import org.pitest.testapi.execute.ExitingResultCollector;
+import org.pitest.testapi.execute.MultipleTestGroup;
+import org.pitest.testapi.execute.Pitest;
+import org.pitest.testapi.execute.containers.ConcreteResultCollector;
+import org.pitest.testapi.execute.containers.UnContainer;
 import org.pitest.util.IsolationUtils;
 import org.pitest.util.Log;
 
@@ -47,8 +49,13 @@ import org.pitest.testapi.Description;
 
 public class MutationTestWorker {
 
-  private static final Logger                               LOG = Log
-                                                                    .getLogger();
+  private static final Logger                               LOG   = Log
+      .getLogger();
+
+  // micro optimise debug logging
+  private static final boolean                              DEBUG = LOG
+      .isLoggable(Level.FINE);
+
   private final Mutater                                     mutater;
   private final ClassLoader                                 loader;
   private final F3<ClassName, ClassLoader, byte[], Boolean> hotswap;
@@ -65,11 +72,15 @@ public class MutationTestWorker {
       final TimeOutDecoratedTestSource testSource) throws IOException {
 
     for (final MutationDetails mutation : range) {
-      LOG.fine("Running mutation " + mutation);
+      if (DEBUG) {
+        LOG.fine("Running mutation " + mutation);
+      }
       final long t0 = System.currentTimeMillis();
       processMutation(r, testSource, mutation);
-      LOG.fine("processed mutation in " + (System.currentTimeMillis() - t0)
-          + " ms.");
+      if (DEBUG) {
+        LOG.fine("processed mutation in " + (System.currentTimeMillis() - t0)
+            + " ms.");
+      }
     }
 
   }
@@ -86,19 +97,21 @@ public class MutationTestWorker {
     // bytes are returned
     JavassistInterceptor.setMutant(mutatedClass);
 
-    LOG.fine("mutating method " + mutatedClass.getDetails().getMethod());
-
+    if (DEBUG) {
+      LOG.fine("mutating method " + mutatedClass.getDetails().getMethod());
+    }
     final List<TestUnit> relevantTests = testSource
         .translateTests(mutationDetails.getTestsInOrder());
 
     r.describe(mutationId);
 
-    final MutationStatusTestPair mutationDetected = handleMutation(mutationDetails,
-        mutatedClass, relevantTests);
+    final MutationStatusTestPair mutationDetected = handleMutation(
+        mutationDetails, mutatedClass, relevantTests);
 
     r.report(mutationId, mutationDetected);
-
-    LOG.fine("Mutation " + mutationId + " detected = " + mutationDetected);
+    if (DEBUG) {
+      LOG.fine("Mutation " + mutationId + " detected = " + mutationDetected);
+    }
   }
 
   private MutationStatusTestPair handleMutation(
@@ -122,16 +135,20 @@ public class MutationTestWorker {
       final MutationDetails mutationId, final Mutant mutatedClass,
       final List<TestUnit> relevantTests) {
     MutationStatusTestPair mutationDetected;
-    LOG.fine("" + relevantTests.size() + " relevant test for "
-        + mutatedClass.getDetails().getMethod());
+    if (DEBUG) {
+      LOG.fine("" + relevantTests.size() + " relevant test for "
+          + mutatedClass.getDetails().getMethod());
+    }
 
     final ClassLoader activeloader = pickClassLoaderForMutant(mutationId);
     final Container c = createNewContainer(activeloader);
     final long t0 = System.currentTimeMillis();
     if (this.hotswap.apply(mutationId.getClassName(), activeloader,
         mutatedClass.getBytes())) {
-      LOG.fine("replaced class with mutant in "
-          + (System.currentTimeMillis() - t0) + " ms");
+      if (DEBUG) {
+        LOG.fine("replaced class with mutant in "
+            + (System.currentTimeMillis() - t0) + " ms");
+      }
       mutationDetected = doTestsDetectMutation(c, relevantTests);
     } else {
       LOG.warning("Mutation " + mutationId + " was not viable ");
@@ -144,10 +161,12 @@ public class MutationTestWorker {
   private static Container createNewContainer(final ClassLoader activeloader) {
     final Container c = new UnContainer() {
       @Override
-      public void submit(final TestUnit group) {
+      public List<TestResult> execute(final TestUnit group) {
+        List<TestResult> results = new ArrayList<TestResult>();
         final ExitingResultCollector rc = new ExitingResultCollector(
-            new ConcreteResultCollector(this.feedbackQueue));
+            new ConcreteResultCollector(results));
         group.execute(activeloader, rc);
+        return results;
       }
     };
     return c;
@@ -155,7 +174,9 @@ public class MutationTestWorker {
 
   private ClassLoader pickClassLoaderForMutant(final MutationDetails mutant) {
     if (mutant.mayPoisonJVM()) {
-      LOG.fine("Creating new classloader for static initializer");
+      if (DEBUG) {
+        LOG.fine("Creating new classloader for static initializer");
+      }
       return new DefaultPITClassloader(new ClassPath(),
           IsolationUtils.bootClassLoader());
     } else {
@@ -174,9 +195,6 @@ public class MutationTestWorker {
     try {
       final CheckTestHasFailedResultListener listener = new CheckTestHasFailedResultListener();
 
-      final DefaultStaticConfig staticConfig = new DefaultStaticConfig();
-      staticConfig.addTestListener(listener);
-
       // Hack to add listener to all the test units in case of timeout
       for (TestUnit tu : tests) {
         if (tu instanceof MutationTimeoutDecorator) {
@@ -185,7 +203,7 @@ public class MutationTestWorker {
         }
       }
 
-      final Pitest pit = new Pitest(staticConfig);
+      final Pitest pit = new Pitest(Collections.singletonList(listener));
       //pit.run(c, createEarlyExitTestGroup(tests));
       pit.run(c, tests);
 
@@ -208,7 +226,7 @@ public class MutationTestWorker {
         buf.append(d.getQualifiedName());
         buf.append(",");
       }
-      String killingTests = buf.substring(0, buf.length()-1);
+      String killingTests = buf.substring(0, buf.length() - 1);
 
       return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
         listener.status(), killingTests);

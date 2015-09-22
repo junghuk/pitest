@@ -16,7 +16,7 @@ import org.pitest.bytecode.MethodDecoratorTest;
 public class AvoidAssertsMethodAdapterTest extends MethodDecoratorTest {
 
   @Mock
-  private Context                   context;
+  private MethodMutationContext     context;
 
   @Mock
   private Label                     label;
@@ -77,13 +77,13 @@ public class AvoidAssertsMethodAdapterTest extends MethodDecoratorTest {
   @Test
   public void shouldDisableMutationsForCodeSettingWhenAssertionDisabledFlagIsSetInStaticInitializer() {
     this.testee.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Class",
-        "desiredAssertionStatus", "()Z");
+        "desiredAssertionStatus", "()Z", true);
     verify(this.context).disableMutations(anyString());
     this.testee
-        .visitFieldInsn(
-            Opcodes.PUTSTATIC,
-            "org/pitest/mutationtest/engine/gregor/TestGregorMutater$HasAssertStatement",
-            "$assertionsDisabled", "Z");
+    .visitFieldInsn(
+        Opcodes.PUTSTATIC,
+        "org/pitest/mutationtest/engine/gregor/TestGregorMutater$HasAssertStatement",
+        "$assertionsDisabled", "Z");
     verify(this.context).enableMutatations(anyString());
   }
 
@@ -110,8 +110,8 @@ public class AvoidAssertsMethodAdapterTest extends MethodDecoratorTest {
   @Override
   @Test
   public void shouldForwardVisitMethodInsnToChild() {
-    this.testee.visitMethodInsn(1, "foo", "bar", "far");
-    verify(this.mv).visitMethodInsn(1, "foo", "bar", "far");
+    this.testee.visitMethodInsn(1, "foo", "bar", "far", true);
+    verify(this.mv).visitMethodInsn(1, "foo", "bar", "far", true);
   }
 
   @Override

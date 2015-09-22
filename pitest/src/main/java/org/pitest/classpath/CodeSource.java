@@ -56,11 +56,16 @@ public class CodeSource implements ClassInfoSource {
   @SuppressWarnings("unchecked")
   public List<ClassInfo> getTests() {
     return flatMap(this.classPath.test(), nameToClassInfo()).filter(
-        and(isWithinATestClass(), isIncludedClass(), not(isExcludedClass()), not(ClassInfo.matchIfAbstract())));
+        and(isWithinATestClass(), isIncludedClass(),
+            not(ClassInfo.matchIfAbstract())));
   }
 
   public ClassPath getClassPath() {
     return this.classPath.getClassPath();
+  }
+
+  public ProjectClassPaths getProjectPaths() {
+    return this.classPath;
   }
 
   public Option<ClassName> findTestee(final String className) {
@@ -72,6 +77,12 @@ public class CodeSource implements ClassInfoSource {
     return FCollection.flatMap(classes, nameToClassInfo());
   }
 
+  // not used but keep to allow plugins to query bytecode
+  public Option<byte[]> fetchClassBytes(final ClassName clazz) {
+    return this.classRepository.querySource(clazz);
+  }
+
+  @Override
   public Option<ClassInfo> fetchClass(final ClassName clazz) {
     return this.classRepository.fetchClass(clazz);
   }
@@ -83,6 +94,7 @@ public class CodeSource implements ClassInfoSource {
   private F<ClassInfo, Boolean> isWithinATestClass() {
     return new F<ClassInfo, Boolean>() {
 
+      @Override
       public Boolean apply(final ClassInfo a) {
         return CodeSource.this.testIdentifier.isATestClass(a);
       }
@@ -93,7 +105,7 @@ public class CodeSource implements ClassInfoSource {
 
   private F<ClassInfo, Boolean> isIncludedClass() {
     return new F<ClassInfo, Boolean>() {
-
+      @Override
       public Boolean apply(final ClassInfo a) {
         return CodeSource.this.testIdentifier.isIncluded(a);
       }
@@ -102,14 +114,4 @@ public class CodeSource implements ClassInfoSource {
 
   }
 
-  private F<ClassInfo, Boolean> isExcludedClass() {
-    return new F<ClassInfo, Boolean>() {
-
-      public Boolean apply(final ClassInfo a) {
-        return CodeSource.this.testIdentifier.isExcluded(a);
-      }
-
-    };
-
-  }
 }

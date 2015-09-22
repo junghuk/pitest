@@ -36,7 +36,7 @@ import org.pitest.mutationtest.report.MutationTestResultMother;
 
 public class XStreamHistoryStoreTest {
 
-  private final static String COV           = BigInteger.TEN.toString(16);
+  private static final String COV           = BigInteger.TEN.toString(16);
 
   private XStreamHistoryStore testee;
 
@@ -47,16 +47,18 @@ public class XStreamHistoryStoreTest {
 
   private final WriterFactory writerFactory = new WriterFactory() {
 
-                                              public PrintWriter create() {
-                                                return new PrintWriter(
-                                                    XStreamHistoryStoreTest.this.output);
-                                              }
+    @Override
+    public PrintWriter create() {
+      return new PrintWriter(
+          XStreamHistoryStoreTest.this.output);
+    }
 
-                                              public void close() {
+    @Override
+    public void close() {
 
-                                              }
+    }
 
-                                            };
+  };
 
   @Before
   public void setUp() {

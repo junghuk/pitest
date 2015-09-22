@@ -4,6 +4,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pitest.mutationtest.LocationMother.aLocation;
+import static org.pitest.mutationtest.LocationMother.aMutationId;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -32,22 +33,22 @@ import org.pitest.testapi.TestUnit;
 
 public class MutationTestWorkerTest {
 
-  private MutationTestWorker                       testee;
+  private MutationTestWorker                          testee;
 
   @Mock
-  private ClassLoader                              loader;
+  private ClassLoader                                 loader;
 
   @Mock
-  private Mutater                                  mutater;
+  private Mutater                                     mutater;
 
   @Mock
   private F3<ClassName, ClassLoader, byte[], Boolean> hotswapper;
 
   @Mock
-  private TimeOutDecoratedTestSource               testSource;
+  private TimeOutDecoratedTestSource                  testSource;
 
   @Mock
-  private Reporter                                 reporter;
+  private Reporter                                    reporter;
 
   @Before
   public void setUp() {
@@ -132,11 +133,13 @@ public class MutationTestWorkerTest {
   private TestUnit makeFailingTest() {
     return new TestUnit() {
 
+      @Override
       public void execute(final ClassLoader loader, final ResultCollector rc) {
         rc.notifyStart(getDescription());
         rc.notifyEnd(getDescription(), new AssertionFailedError());
       }
 
+      @Override
       public Description getDescription() {
         return new Description("atest");
       }
@@ -147,11 +150,13 @@ public class MutationTestWorkerTest {
   private TestUnit makePassingTest() {
     return new TestUnit() {
 
+      @Override
       public void execute(final ClassLoader loader, final ResultCollector rc) {
         rc.notifyStart(getDescription());
         rc.notifyEnd(getDescription());
       }
 
+      @Override
       public Description getDescription() {
         return new Description("atest");
       }
@@ -160,9 +165,11 @@ public class MutationTestWorkerTest {
   }
 
   public MutationDetails makeMutant(final String clazz, final int index) {
-    final MutationDetails md = new MutationDetails(new MutationIdentifier(
-        aLocation().withClass(clazz), index, "mutator"), "sourceFile", "desc",
-         42, 0);
+    MutationIdentifier id = aMutationId()
+        .withLocation(aLocation().withClass(ClassName.fromString(clazz)))
+        .withIndex(index).withMutator("mutator").build();
+    final MutationDetails md = new MutationDetails(id, "sourceFile", "desc",
+        42, 0);
 
     when(this.mutater.getMutation(md.getId())).thenReturn(
         new Mutant(md, new byte[0]));

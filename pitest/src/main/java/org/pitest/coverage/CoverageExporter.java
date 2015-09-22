@@ -4,6 +4,6 @@ import java.util.Collection;
 
 public interface CoverageExporter {
 
-  public abstract void recordCoverage(Collection<LineCoverage> coverage);
+  void recordCoverage(Collection<BlockCoverage> coverage);
 
 }

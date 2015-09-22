@@ -1,12 +1,12 @@
 /*
  * Copyright 2011 Henry Coles
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.pitest.DescriptionMother;
 import org.pitest.functional.Option;
 import org.pitest.mutationtest.DetectionStatus;
-import org.pitest.mutationtest.execute.CheckTestHasFailedResultListener;
 import org.pitest.testapi.Description;
 import org.pitest.testapi.TestResult;
 
@@ -50,43 +49,9 @@ public class CheckTestHasFailedResultListenerTest {
   }
 
   @Test
-  public void shouldReturnDetectionStatusOfKilledWhenEncountersError() {
-    this.testee.onTestError(new TestResult(this.description, null));
-    assertEquals(DetectionStatus.KILLED, this.testee.status());
-  }
-
-  @Test
   public void shouldRecordDescriptionOfLastFailingTest() {
     this.testee.onTestFailure(new TestResult(this.description, null));
     java.util.ArrayList<Description> descriptions = new java.util.ArrayList<Description>();
-    descriptions.add(this.description);
-    assertEquals(Option.some(descriptions), this.testee.lastFailingTest());
-  }
-
-  @Test
-  public void shouldRecordMultipleDescriptionsofLastFailingTests() {
-    this.testee.onTestFailure(new TestResult(this.description, null));
-    this.testee.onTestFailure(new TestResult(this.description, null));
-    java.util.ArrayList<Description> descriptions = new java.util.ArrayList<Description>();
-    descriptions.add(this.description);
-    descriptions.add(this.description);
-    assertEquals(Option.some(descriptions), this.testee.lastFailingTest());
-  }
-
-  @Test
-  public void shouldRecordDescriptionOfLastErroringTest() {
-    this.testee.onTestError(new TestResult(this.description, null));
-    java.util.ArrayList<Description> descriptions = new java.util.ArrayList<Description>();
-    descriptions.add(this.description);
-    assertEquals(Option.some(descriptions), this.testee.lastFailingTest());
-  }
-
-  @Test
-  public void shouldRecordMultipleDescriptionsofLastErroringTests() {
-    this.testee.onTestError(new TestResult(this.description, null));
-    this.testee.onTestError(new TestResult(this.description, null));
-    java.util.ArrayList<Description> descriptions = new java.util.ArrayList<Description>();
-    descriptions.add(this.description);
     descriptions.add(this.description);
     assertEquals(Option.some(descriptions), this.testee.lastFailingTest());
   }

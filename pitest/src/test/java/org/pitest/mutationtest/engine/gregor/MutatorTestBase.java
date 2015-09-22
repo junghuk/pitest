@@ -1,16 +1,16 @@
 /*
  * Copyright 2010 Henry Coles
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * 
- * Unless required by applicable law or agreed to in writing, 
- * software distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and limitations under the License. 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and limitations under the License.
  */
 package org.pitest.mutationtest.engine.gregor;
 
@@ -27,7 +27,9 @@ import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.CheckClassAdapter;
+import org.objectweb.asm.util.TraceClassVisitor;
 import org.pitest.classinfo.ClassByteArraySource;
 import org.pitest.classinfo.ClassName;
 import org.pitest.classpath.ClassPathByteArraySource;
@@ -62,7 +64,7 @@ public abstract class MutatorTestBase {
   protected void createTesteeWith(final Predicate<MethodInfo> filter,
       final MethodMutatorFactory... mutators) {
     this.engine = new GregorMutater(new ClassPathByteArraySource(), filter,
-        Arrays.asList(mutators), filteredClasses(), filter());
+        Arrays.asList(mutators), filteredClasses(), inlinedCodeFilter());
   }
 
   private Collection<String> filteredClasses() {
@@ -73,7 +75,7 @@ public abstract class MutatorTestBase {
       final Predicate<MethodInfo> filter,
       final Collection<MethodMutatorFactory> mutators) {
     this.engine = new GregorMutater(source, filter, mutators,
-        filteredClasses(), filter());
+        filteredClasses(), inlinedCodeFilter());
   }
 
   protected void createTesteeWith(final Predicate<MethodInfo> filter,
@@ -85,10 +87,10 @@ public abstract class MutatorTestBase {
       final Collection<String> loggingClasses,
       final Collection<MethodMutatorFactory> mutators) {
     this.engine = new GregorMutater(new ClassPathByteArraySource(), filter,
-        mutators, loggingClasses, filter());
+        mutators, loggingClasses, inlinedCodeFilter());
   }
 
-  private final InlinedCodeFilter filter() {
+  private InlinedCodeFilter inlinedCodeFilter() {
     return new NoInlinedCodeDetection();
   }
 
@@ -104,6 +106,11 @@ public abstract class MutatorTestBase {
   protected <T> void assertMutantCallableReturns(final Callable<T> unmutated,
       final Mutant mutant, final T expected) throws Exception {
     assertEquals(expected, mutateAndCall(unmutated, mutant));
+  }
+
+  protected void assertNoMutants(final Class<?> mutee) {
+    final Collection<MutationDetails> actual = findMutationsFor(mutee);
+    assertTrue(actual.isEmpty());
   }
 
   protected <T> T mutateAndCall(final Callable<T> unmutated, final Mutant mutant) {
@@ -127,6 +134,7 @@ public abstract class MutatorTestBase {
   private Transformation createTransformation(final Mutant mutant) {
     return new Transformation() {
 
+      @Override
       public byte[] transform(final String name, final byte[] bytes) {
         if (name.equals(mutant.getDetails().getClassName().asJavaName())) {
           return mutant.getBytes();
@@ -155,6 +163,7 @@ public abstract class MutatorTestBase {
   private F<MutationDetails, Mutant> createMutant() {
     return new F<MutationDetails, Mutant>() {
 
+      @Override
       public Mutant apply(final MutationDetails a) {
         return MutatorTestBase.this.engine.getMutation(a.getId());
       }
@@ -184,24 +193,22 @@ public abstract class MutatorTestBase {
 
   }
 
-  protected void printMutant(final Mutant mutant) {
-    // final ASMifierClassVisitor asm = new ASMifierClassVisitor(new
-    // PrintWriter(
-    // System.out));
-    // final ClassReader r = new ClassReader(mutant.getBytes());
-    // r.accept(asm, ClassReader.SKIP_FRAMES);
+  protected void printMutant(final Mutant mutant) {    
+     final ClassReader reader = new ClassReader(mutant.getBytes());
+     reader.accept(new TraceClassVisitor(null, new ASMifier(), new PrintWriter(
+         System.out)), ClassReader.EXPAND_FRAMES);
   }
 
   protected void assertMutantsReturn(final Callable<String> mutee,
 
-  final FunctionalList<MutationDetails> details,
+      final FunctionalList<MutationDetails> details,
       final String... expectedResults) {
 
     final List<Mutant> mutants = this.getMutants(details);
     assertEquals("Should return one mutant for each request", details.size(),
         mutants.size());
-    final FunctionalList<String> results = FCollection.map(mutants
-        ,mutantToStringReults(mutee));
+    final FunctionalList<String> results = FCollection.map(mutants,
+        mutantToStringReults(mutee));
 
     int i = 0;
     for (final String actual : results) {
@@ -213,6 +220,7 @@ public abstract class MutatorTestBase {
   private F<Mutant, String> mutantToStringReults(final Callable<String> mutee) {
     return new F<Mutant, String>() {
 
+      @Override
       public String apply(final Mutant mutant) {
         return mutateAndCall(mutee, mutant);
       }
@@ -240,6 +248,7 @@ public abstract class MutatorTestBase {
   protected Predicate<MethodInfo> mutateOnlyCallMethod() {
     return new Predicate<MethodInfo>() {
 
+      @Override
       public Boolean apply(final MethodInfo a) {
         return a.getName().equals("call");
       }
@@ -249,10 +258,10 @@ public abstract class MutatorTestBase {
 
   protected F<MutationDetails, Boolean> descriptionContaining(final String value) {
     return new F<MutationDetails, Boolean>() {
+      @Override
       public Boolean apply(final MutationDetails a) {
         return a.getDescription().contains(value);
       }
     };
   }
-
 }

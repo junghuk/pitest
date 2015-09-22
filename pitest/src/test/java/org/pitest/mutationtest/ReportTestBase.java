@@ -7,10 +7,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 import org.junit.Before;
-import org.mockito.MockitoAnnotations;
 import org.pitest.classpath.ClassPathRoot;
 import org.pitest.classpath.CodeSource;
 import org.pitest.classpath.PathFilter;
@@ -19,15 +20,13 @@ import org.pitest.coverage.CoverageGenerator;
 import org.pitest.coverage.execute.CoverageOptions;
 import org.pitest.coverage.execute.DefaultCoverageGenerator;
 import org.pitest.coverage.export.NullCoverageExporter;
-import org.pitest.functional.F;
-import org.pitest.functional.FCollection;
 import org.pitest.functional.predicate.Predicate;
 import org.pitest.functional.predicate.True;
 import org.pitest.junit.JUnitCompatibleConfiguration;
+import org.pitest.mutationtest.config.PluginServices;
 import org.pitest.mutationtest.config.ReportOptions;
 import org.pitest.mutationtest.config.SettingsFactory;
 import org.pitest.mutationtest.engine.gregor.config.GregorEngineFactory;
-import org.pitest.mutationtest.engine.gregor.config.Mutator;
 import org.pitest.mutationtest.incremental.NullHistoryStore;
 import org.pitest.mutationtest.tooling.JarCreatingJarFinder;
 import org.pitest.mutationtest.tooling.MutationCoverage;
@@ -46,25 +45,30 @@ public abstract class ReportTestBase {
   protected MetaDataExtractor metaDataExtractor;
   protected ReportOptions     data;
 
+  private PluginServices      plugins;
+
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
     this.metaDataExtractor = new MetaDataExtractor();
+    this.plugins = PluginServices.makeForContextLoader();
     this.data = new ReportOptions();
     this.data.setSourceDirs(Collections.<File> emptyList());
-    // this.data.setMutators(Mutator.DEFAULTS.asCollection());
   }
 
   protected MutationResultListenerFactory listenerFactory() {
     return new MutationResultListenerFactory() {
-      public MutationResultListener getListener(ListenerArguments args) {
+      @Override
+      public MutationResultListener getListener(Properties props,
+          ListenerArguments args) {
         return ReportTestBase.this.metaDataExtractor;
       }
 
+      @Override
       public String name() {
         return null;
       }
 
+      @Override
       public String description() {
         return null;
       }
@@ -90,7 +94,7 @@ public abstract class ReportTestBase {
   protected Collection<Predicate<String>> predicateFor(final Class<?> clazz) {
     return predicateFor(clazz.getName());
   }
-  
+
   protected void createAndRun() {
     createAndRun(new JUnitCompatibleConfiguration(new TestGroupConfig()));
   }
@@ -99,10 +103,10 @@ public abstract class ReportTestBase {
     final JavaAgent agent = new JarCreatingJarFinder();
     try {
 
-      this.data.setConfiguration(configuration);
-      final CoverageOptions coverageOptions = this.data.createCoverageOptions();
-      final LaunchOptions launchOptions = new LaunchOptions(agent, new DefaultJavaExecutableLocator(),
-          this.data.getJvmArgs());
+      final CoverageOptions coverageOptions = createCoverageOptions(configuration);
+      final LaunchOptions launchOptions = new LaunchOptions(agent,
+          new DefaultJavaExecutableLocator(), this.data.getJvmArgs(),
+          new HashMap<String, String>());
 
       final PathFilter pf = new PathFilter(new True<ClassPathRoot>(),
           new True<ClassPathRoot>());
@@ -124,7 +128,8 @@ public abstract class ReportTestBase {
           listenerFactory(), null);
 
       final MutationCoverage testee = new MutationCoverage(strategies, null,
-          code, this.data, new SettingsFactory(this.data), timings);
+          code, this.data, new SettingsFactory(this.data, this.plugins),
+          timings);
 
       testee.runReport();
     } catch (final IOException e) {
@@ -133,17 +138,15 @@ public abstract class ReportTestBase {
       agent.close();
     }
   }
-  
-  protected void setMutators(final Mutator mutator) {
-    this.data.setMutators(FCollection.map(Arrays.asList(mutator), asString()));
+
+  private CoverageOptions createCoverageOptions(Configuration configuration) {
+    return new CoverageOptions(this.data.getTargetClassesFilter(),
+        configuration, this.data.isVerbose(),
+        this.data.getDependencyAnalysisMaxDistance());
   }
 
-  private F<Mutator, String> asString() {
-    return new F<Mutator, String>() {
-      public String apply(final Mutator a) {
-        return a.name();
-      }
-    };
+  protected void setMutators(final String mutator) {
+    this.data.setMutators(Arrays.asList(mutator));
   }
 
 }

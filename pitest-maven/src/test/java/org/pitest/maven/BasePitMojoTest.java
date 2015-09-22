@@ -1,12 +1,12 @@
 /*
  * Copyright 2011 Henry Coles
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,20 +35,27 @@ import org.pitest.classpath.ClassPath;
 import org.pitest.functional.F;
 import org.pitest.functional.FCollection;
 import org.pitest.functional.predicate.Predicate;
+import org.pitest.mutationtest.config.PluginServices;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public abstract class BasePitMojoTest extends AbstractMojoTestCase {
 
   @Mock
-  protected MavenProject   project;
+  protected MavenProject        project;
 
   @Mock
-  protected RunPitStrategy executionStrategy;
+  protected RunPitStrategy      executionStrategy;
 
-  protected List<String>   classPath;
+  protected List<String>        classPath;
 
   @Mock
   protected Predicate<Artifact> filter;
 
+  @Mock
+  protected PluginServices      plugins;
+
+  @SuppressWarnings("unchecked")
   @Override
   protected void setUp() throws Exception {
     super.setUp();
@@ -57,11 +64,16 @@ public abstract class BasePitMojoTest extends AbstractMojoTestCase {
         ClassPath.getClassPathElementsAsFiles(), fileToString()));
     when(this.project.getTestClasspathElements()).thenReturn(this.classPath);
     when(this.project.getPackaging()).thenReturn("jar");
+    when(this.plugins.findToolClasspathPlugins()).thenReturn(
+        Collections.emptyList());
+    when(this.plugins.findClientClasspathPlugins()).thenReturn(
+        Collections.emptyList());
   }
 
   private F<File, String> fileToString() {
     return new F<File, String>() {
 
+      @Override
       public String apply(final File a) {
         return a.getAbsolutePath();
       }
@@ -86,8 +98,8 @@ public abstract class BasePitMojoTest extends AbstractMojoTestCase {
   }
 
   protected PitMojo createPITMojo(final String config) throws Exception {
-
-    final PitMojo pitMojo = new PitMojo(this.executionStrategy, filter);
+    final PitMojo pitMojo = new PitMojo(this.executionStrategy, this.filter,
+        this.plugins);
     configurePitMojo(pitMojo, config);
     return pitMojo;
   }
@@ -107,6 +119,9 @@ public abstract class BasePitMojoTest extends AbstractMojoTestCase {
     setVariableValueToObject(pitMojo, "pluginArtifactMap", pluginArtifacts);
 
     setVariableValueToObject(pitMojo, "project", this.project);
+
+    ArrayList<String> elements = new ArrayList<String>();
+    setVariableValueToObject(pitMojo, "additionalClasspathElements", elements);
 
   }
 
