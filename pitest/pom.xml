@@ -191,21 +191,12 @@
 						<goals>
 							<goal>check</goal>
 						</goals>
-<<<<<<< HEAD
-			            <configuration>
-			               <dependencyDefinition>
-			                   show allResults
-			                   check absenceOfPackageCycles > 1 in org.pitest.*
-			               </dependencyDefinition>	
-			            </configuration>
-=======
 						<configuration>
 							<dependencyDefinition>
 								show allResults
 								check absenceOfPackageCycles &gt; 3 in org.pitest.*
 							</dependencyDefinition>
 						</configuration>
->>>>>>> fullmatrix
 					</execution>
 				</executions>
 			</plugin>
@@ -223,20 +214,12 @@
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm</artifactId>
-<<<<<<< HEAD
-			<version>4.2</version>
-=======
 			<version>${asm.version}</version>
->>>>>>> fullmatrix
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-commons</artifactId>
-<<<<<<< HEAD
-			<version>4.2</version>
-=======
 			<version>${asm.version}</version>
->>>>>>> fullmatrix
 		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
@@ -252,21 +235,13 @@
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-util</artifactId>
-<<<<<<< HEAD
-			<version>4.2</version>
-=======
 			<version>${asm.version}</version>
->>>>>>> fullmatrix
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-analysis</artifactId>
-<<<<<<< HEAD
-			<version>4.2</version>
-=======
 			<version>${asm.version}</version>
->>>>>>> fullmatrix
 			<scope>test</scope>
 		</dependency>
 		<dependency>
