@@ -226,7 +226,7 @@ public class MutationTestWorker {
         buf.append(d.getQualifiedName());
         buf.append(",");
       }
-      String killingTests = buf.substring(0, buf.length()-1);
+      String killingTests = buf.substring(0, buf.length() - 1);
 
       return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
         listener.status(), killingTests);
