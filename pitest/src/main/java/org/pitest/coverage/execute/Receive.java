@@ -81,11 +81,7 @@ final class Receive implements ReceiveStrategy {
       readProbeHit(is, hits);
     }
 
-    CoverageResult cr = createCoverageResult(is, d, hits);
-    if (cr.isGreenTest()) {
-      this.handler.apply(cr);
-    }
-    //this.handler.apply(createCoverageResult(is, d, hits));
+    this.handler.apply(createCoverageResult(is, d, hits));
   }
 
   private void readProbeHit(final SafeDataInputStream is,
@@ -103,10 +99,10 @@ final class Receive implements ReceiveStrategy {
       final Description d, Collection<BlockLocation> visitedBlocks) {
     final boolean isGreen = is.readBoolean();
     final int executionTime = is.readInt();
-    //final CoverageResult cr = new CoverageResult(d, executionTime, isGreen,
-    //    visitedBlocks);
-    final CoverageResult cr = new CoverageResult(d, executionTime, true,
+    final CoverageResult cr = new CoverageResult(d, executionTime, isGreen,
         visitedBlocks);
+    //final CoverageResult cr = new CoverageResult(d, executionTime, true,
+    //    visitedBlocks);
     return cr;
   }
 
