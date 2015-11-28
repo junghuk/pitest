@@ -45,11 +45,11 @@ public final class Description {
   }
 
   public String getQualifiedName() {
-    //if (this.testClass != null) {
-    //  return this.getFirstTestClass() + "." + this.getName();
-    //} else {
+    if (this.testClass != null) {
+      return this.getFirstTestClass() + "." + this.getName();
+    } else {
       return this.getName();
-    //}
+    }
   }
 
   public String getName() {
