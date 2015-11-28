@@ -84,7 +84,20 @@ public class TestNGAdapter implements ITestListener {
   }
 
   private Description makeDescription(final ITestResult result) {
-    return new Description(result.getMethod().getMethodName(), this.clazz);
+	  String method = result.getMethod().getMethodName();
+		String klass = result.getTestClass().getName();
+		StringBuilder sb = new StringBuilder();
+		for(Object each : result.getParameters()){
+			sb.append("|"+each.toString());
+		}
+		if(sb.length()>0){
+			sb.setCharAt(0, '[');
+			sb.append(']');
+		}
+
+		String sessionId = method+sb.toString()+"("+klass+")";
+
+    return new Description(sessionId);
   }
 
 }
