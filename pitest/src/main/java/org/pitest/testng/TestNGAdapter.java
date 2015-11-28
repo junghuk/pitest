@@ -60,7 +60,7 @@ public class TestNGAdapter implements ITestListener {
 
   @Override
   public void onTestFailure(final ITestResult arg0) {
-    this.hasHadFailure = true;
+    //this.hasHadFailure = true;
     this.error = arg0.getThrowable();
     this.rc.notifyEnd(makeDescription(arg0), this.error);
   }
