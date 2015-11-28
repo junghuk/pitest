@@ -38,16 +38,18 @@ public class TestNGAdapter implements ITestListener {
 
   @Override
   public void onFinish(final ITestContext arg0) {
+	/*
     if (this.error != null) {
       this.rc.notifyEnd(this.description, this.error);
     } else {
       this.rc.notifyEnd(this.description);
     }
+    */
   }
 
   @Override
   public void onStart(final ITestContext arg0) {
-    this.rc.notifyStart(this.description);
+    //this.rc.notifyStart(this.description);
   }
 
   @Override
