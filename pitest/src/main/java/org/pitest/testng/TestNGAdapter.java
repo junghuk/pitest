@@ -14,8 +14,11 @@
  */
 package org.pitest.testng;
 
+import java.util.logging.Logger;
+
 import org.pitest.testapi.Description;
 import org.pitest.testapi.ResultCollector;
+import org.pitest.util.Log;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
@@ -28,6 +31,8 @@ public class TestNGAdapter implements ITestListener {
   private final Class<?>        clazz;
   private boolean               hasHadFailure = false;
   private Throwable             error;
+  
+  private static final Logger                LOG = Log.getLogger();
 
   public TestNGAdapter(final Class<?> clazz, final Description d,
       final ResultCollector rc) {
@@ -62,6 +67,7 @@ public class TestNGAdapter implements ITestListener {
   public void onTestFailure(final ITestResult arg0) {
     //this.hasHadFailure = true;
     this.error = arg0.getThrowable();
+    LOG.info("fails: " + makeDescription(arg0));
     this.rc.notifyEnd(makeDescription(arg0), this.error);
   }
 
@@ -88,7 +94,7 @@ public class TestNGAdapter implements ITestListener {
 		String klass = result.getTestClass().getName();
 		StringBuilder sb = new StringBuilder();
 		for(Object each : result.getParameters()){
-			sb.append("|"+each.toString());
+			sb.append("|"+each.hashCode());
 		}
 		if(sb.length()>0){
 			sb.setCharAt(0, '[');

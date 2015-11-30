@@ -38,7 +38,7 @@ public class ExitingResultCollector implements ResultCollector {
 
   @Override
   public boolean shouldExit() {
-    return this.hadFailure;
+	return this.hadFailure;
   }
 
   @Override
